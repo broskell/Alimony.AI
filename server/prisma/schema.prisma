@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  LAWYER
+  ADMIN
+}
+
+enum CaseStatus {
+  ACTIVE
+  SETTLED
+  DISMISSED
+  PENDING
+  APPEALED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole @default(CLIENT)
+  phone        String?
+  state        String?
+  city         String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile       LawyerProfile?
+  cases         Case[]         @relation("ClientCases")
+  consultations Consultation[]
+  calculations  AlimonyCal[]
+  chatSessions  ChatSession[]
+  documents     Document[]
+  savedLawyers  SavedLawyer[]
+}
+
+model LawyerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  barNumber       String   @unique
+  enrollmentYear  Int
+  court           String
+  specializations String[]
+  experience      Int
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0)
+  feePerHour      Int
+  feeConsultation Int
+  bio             String
+  languages       String[]
+  verified        Boolean  @default(false)
+  available       Boolean  @default(true)
+  state           String
+  city            String
+  highCourtBars   String[]
+  cases           Case[]   @relation("LawyerCases")
+  consultations   Consultation[]
+}
+
+model Case {
+  id          String     @id @default(cuid())
+  caseNumber  String     @unique
+  title       String
+  court       String
+  state       String
+  clientId    String
+  client      User       @relation("ClientCases", fields: [clientId], references: [id])
+  lawyerId    String?
+  lawyer      LawyerProfile? @relation("LawyerCases", fields: [lawyerId], references: [id])
+  status      CaseStatus @default(ACTIVE)
+  filingDate  DateTime
+  nextHearing DateTime?
+  acts        String[]
+  sections    String[]
+  description String
+  documents   Document[]
+  hearings    Hearing[]
+  aiSummary   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Hearing {
+  id       String   @id @default(cuid())
+  caseId   String
+  case     Case     @relation(fields: [caseId], references: [id])
+  date     DateTime
+  court    String
+  judge    String?
+  outcome  String?
+  notes    String?
+  nextDate DateTime?
+}
+
+model AlimonyCal {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  inputData Json
+  result    Json
+  pdfUrl    String?
+  state     String
+  act       String
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  caseId      String?
+  case        Case?    @relation(fields: [caseId], references: [id])
+  name        String
+  type        String
+  content     String?
+  pdfUrl      String?
+  aiGenerated Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String   @default("New session")
+  messages  Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Consultation {
+  id       String        @id @default(cuid())
+  clientId String
+  client   User          @relation(fields: [clientId], references: [id])
+  lawyerId String
+  lawyer   LawyerProfile @relation(fields: [lawyerId], references: [id])
+  date     DateTime
+  duration Int
+  mode     String
+  status   String        @default("pending")
+  notes    String?
+  fee      Int
+  createdAt DateTime     @default(now())
+}
+
+model SavedLawyer {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  lawyerId String
+  @@unique([userId, lawyerId])
+}
+
+model LegalAct {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  shortName   String
+  year        Int
+  description String
+  sections    LegalSection[]
+}
+
+model LegalSection {
+  id        String   @id @default(cuid())
+  actId     String
+  act       LegalAct @relation(fields: [actId], references: [id])
+  number    String
+  title     String
+  text      String
+  keywords  String[]
+  relevance String
+}
+
+model CasePrecedent {
+  id        String   @id @default(cuid())
+  citation  String   @unique
+  court     String
+  year      Int
+  parties   String
+  summary   String
+  holding   String
+  relevance String[]
+  acts      String[]
+  state     String?
+}

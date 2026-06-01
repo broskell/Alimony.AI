@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+:root {
+  --font-display: 'Clash Display', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  --bg-base: #080810;
+  --bg-surface: #0F0F1A;
+  --bg-raised: #161625;
+  --bg-overlay: #1E1E32;
+  --bg-card: #131320;
+
+  --border-dim: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.20);
+
+  --text-primary: #F2F0EA;
+  --text-secondary: #8A8A9E;
+  --text-muted: #44445A;
+
+  --gold: #C9A84C;
+  --gold2: #E6C06A;
+  --gold3: #F5D48A;
+  --red: #D94F3D;
+  --red2: #F06050;
+  --green: #3DDB85;
+  --blue: #4B8EF5;
+  /* Primary CTA — warm gold (no purple) */
+  --accent: #C9A84C;
+  --accent-hover: #E6C06A;
+  --accent-glow: rgba(201, 168, 76, 0.22);
+  --btn-on-accent: #1A1208;
+  --nav-bg: rgba(8, 8, 16, 0.88);
+
+  --sev-high: #D94F3D;
+  --sev-mid: #C9A84C;
+  --sev-low: #3DDB85;
+}
+
+[data-theme="light"] {
+  --bg-base: #FAF7F2;
+  --bg-surface: #F4EDE0;
+  --bg-raised: #EDE0CC;
+  --bg-overlay: #E4D4B8;
+  --bg-card: #FFFFFF;
+
+  --border-dim: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.22);
+
+  --text-primary: #1A1208;
+  --text-secondary: #5A4A2A;
+  --text-muted: #8A7A5A;
+
+  --nav-bg: rgba(250, 247, 242, 0.92);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.75;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  transition: background 250ms ease, color 250ms ease;
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1, h2, h3, .brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.mono, .score, .stat, .amount, code {
+  font-family: var(--font-mono);
+  font-weight: 300;
+}
+
+.label-chip {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg::before,
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-bg::before {
+  background: radial-gradient(600px circle at 20% 30%, rgba(201, 168, 76, 0.14), transparent);
+  animation: drift1 22s ease-in-out infinite alternate;
+}
+
+.hero-bg::after {
+  background: radial-gradient(500px circle at 80% 70%, rgba(201, 168, 76, 0.08), transparent);
+  animation: drift2 28s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  from { transform: translate(0, 0); }
+  to { transform: translate(40px, 60px); }
+}
+
+@keyframes drift2 {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-60px, -40px); }
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 0 4px var(--accent-glow); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: var(--gold);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--gold) !important;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+.app-nav {
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  font-weight: 500;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-ghost {
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
