@@ -21,7 +21,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.get('/api/health', (_, res) => res.json({ ok: true, service: 'Alimony.AI' }));
+app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/calculator', calculatorRoutes);

@@ -50,7 +50,7 @@ export default function ChatInterface() {
     setMessages((m) => [...m, placeholder]);
 
     try {
-      const base = import.meta.env.VITE_API_URL || '/api';
+      const base = import.meta.env.VITE_API_URL;
       const res = await fetch(`${base}/ai/chat`, {
         method: 'POST',
         headers: {
