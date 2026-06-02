@@ -123,9 +123,9 @@ export default function ChatInterface() {
       }
     } catch (e) {
       setActiveError(true);
-      const friendlyError = e.message.includes('Failed to fetch')
+      const friendlyError = e.message && e.message.includes('Failed to fetch')
         ? 'Network Connection lost. Please ensure the backend is running and try again.'
-        : `Error: ${e.message}`;
+        : `Error: ${e.message || 'Unknown error'}`;
       
       setMessages((m) => {
         const copy = [...m];

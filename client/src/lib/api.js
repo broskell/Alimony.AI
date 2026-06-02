@@ -15,7 +15,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    const message = err.response?.data?.error || err.message || 'Request failed';
+    const errorData = err.response?.data?.error;
+    const message = typeof errorData === 'object' && errorData !== null
+      ? errorData.message || errorData.code || JSON.stringify(errorData)
+      : errorData || err.message || 'Request failed';
     return Promise.reject(new Error(message));
   }
 );

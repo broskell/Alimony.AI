@@ -26,7 +26,7 @@ export default function Calculator() {
       navigate('/results');
     } catch (e) {
       console.error('Calculation API failed:', e);
-      const isNetwork = e.message.includes('Network Error') || e.message.includes('Failed to fetch');
+      const isNetwork = e.message && (e.message.includes('Network Error') || e.message.includes('Failed to fetch'));
       const msg = isNetwork
         ? 'Network Connection Error: Unable to connect to the backend server. Please verify it is running on port 5000.'
         : e.message || 'Calculation failed';
