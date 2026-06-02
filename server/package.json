@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/app.js",
-    "start": "node src/app.js",
+    "dev": "tsx watch src/app.js",
+    "start": "tsx src/app.js",
     "db:migrate": "prisma migrate dev",
     "db:seed": "node prisma/seed.js",
     "db:generate": "prisma generate"
@@ -25,6 +25,9 @@
     "prisma": "^5.22.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/node": "^25.9.1",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }

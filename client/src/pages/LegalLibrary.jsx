@@ -99,10 +99,16 @@ export default function LegalLibrary() {
               <h2 className="text-2xl">{selectedSection.number}</h2>
               <p className="mt-1 text-lg" style={{ color: 'var(--text-secondary)' }}>{selectedSection.title}</p>
               <p className="mt-6 font-light leading-loose">{selectedSection.text}</p>
-              <button type="button" onClick={explain} className="btn-primary mt-6 rounded-lg px-4 py-2 text-sm">
+              <button type="button" onClick={explain} className="btn-primary mt-6 rounded-lg px-4 py-2 text-sm block">
                 Explain in plain language →
               </button>
-              {explanation && <StreamingText text={explanation} className="mt-6 text-sm font-light italic" />}
+              {explanation && (
+                <div className="mt-6 border-l-2 pl-4 py-1 block" style={{ borderColor: 'var(--gold)' }}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--gold)' }}>AI Explanation</p>
+                  <StreamingText text={explanation} className="text-sm font-light italic" style={{ color: 'var(--text-secondary)' }} />
+                </div>
+              )}
+
             </>
           ) : (
             <p style={{ color: 'var(--text-muted)' }}>Select an act and section</p>

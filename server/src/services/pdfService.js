@@ -4,11 +4,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOAD_DIR = path.join(__dirname, '../../uploads');
+const UPLOAD_DIR = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../../uploads');
 
 async function ensureUploadDir() {
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
+  if (!process.env.VERCEL) {
+    await fs.mkdir(UPLOAD_DIR, { recursive: true });
+  }
 }
+
 
 export async function generateAlimonyPdf(calc, inputData, userName = 'Applicant') {
   await ensureUploadDir();

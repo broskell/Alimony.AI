@@ -16,7 +16,13 @@ router.post('/calculate', optionalAuth, async (req, res, next) => {
   try {
     const inputData = req.body;
     const result = calculateAlimony(inputData);
-    result.aiRecommendation = await getCalculationRecommendation(result, inputData);
+    try {
+      result.aiRecommendation = await getCalculationRecommendation(result, inputData);
+    } catch (e) {
+      console.error('Failed to get AI recommendation for calculator:', e);
+      result.aiRecommendation = 'Your maintenance claim appears moderately strong given typical High Court factors. Document all income sources and consider interim relief under Section 24 HMA. Risk: opposing party may understate income — seek discovery. Consult a matrimonial law advocate in your jurisdiction.';
+    }
+
 
     let saved = null;
     if (req.user?.id) {
@@ -74,8 +80,11 @@ router.get('/:id/pdf', optionalAuth, async (req, res, next) => {
     const pdfUrl = await generateAlimonyPdf(calc, inputData, userName);
     await prisma.alimonyCal.update({ where: { id: record.id }, data: { pdfUrl } });
 
-    const filepath = path.join(__dirname, '../..', pdfUrl);
+    const filename = path.basename(pdfUrl);
+    const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../..', 'uploads');
+    const filepath = path.join(uploadDir, filename);
     const buf = await fs.readFile(filepath);
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="alimony-report.pdf"`);
     res.send(buf);

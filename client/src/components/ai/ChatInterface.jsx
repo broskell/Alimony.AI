@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAppStore } from '../../store/useAppStore';
 import StreamingText from '../ui/StreamingText';
+import Icon from '../ui/Icon';
 
 const QUICK = [
   'Explain interim maintenance under Section 24 HMA',
@@ -10,11 +12,15 @@ const QUICK = [
 
 export default function ChatInterface() {
   const { token } = useAuthStore();
+  const { showToast } = useAppStore();
   const [messages, setMessages] = useState([
     { role: 'assistant', content: "Namaste. I'm Lex, your Indian family law assistant. How can I help you today?" },
   ]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [lastUserPrompt, setLastUserPrompt] = useState('');
+  const [activeError, setActiveError] = useState(false);
+  const [providerStatus, setProviderStatus] = useState('');
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -25,17 +31,28 @@ export default function ChatInterface() {
     const content = text || input.trim();
     if (!content || streaming) return;
 
-    const newMsgs = [...messages, { role: 'user', content }];
+    // Reset error state and status
+    setActiveError(false);
+    setProviderStatus('');
+    setLastUserPrompt(content);
+
+    // Keep history clean of errors for resubmission
+    const chatHistory = messages.filter((m) => !m.content.startsWith('Error:'));
+    
+    // Add user message
+    const newMsgs = [...chatHistory, { role: 'user', content }];
     setMessages(newMsgs);
     setInput('');
     setStreaming(true);
-    
+
+    // Add placeholder assistant message
     const placeholder = { role: 'assistant', content: '' };
-    console.log('Assistant message object after creation:', placeholder);
     setMessages((m) => [...m, placeholder]);
 
     try {
-      const base = import.meta.env.VITE_API_URL || '/api';
+      const isLocal = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      const base = isLocal ? (import.meta.env.VITE_API_URL || '/api') : '/api';
       const res = await fetch(`${base}/ai/chat`, {
         method: 'POST',
         headers: {
@@ -45,7 +62,9 @@ export default function ChatInterface() {
         body: JSON.stringify({ messages: newMsgs.filter((m) => m.role !== 'assistant' || m.content) }),
       });
 
-      console.log('Full API Response:', res);
+      if (res.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      }
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -59,7 +78,10 @@ export default function ChatInterface() {
         throw new Error(errorMessage);
       }
 
-      const reader = res.body.getReader();
+      const reader = res.body?.getReader();
+      if (!reader) {
+        throw new Error('Unable to read the response stream');
+      }
       const decoder = new TextDecoder();
       let acc = '';
       let buffer = '';
@@ -68,7 +90,6 @@ export default function ChatInterface() {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        console.log('API response chunk:', chunk);
         buffer += chunk;
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
@@ -78,16 +99,22 @@ export default function ChatInterface() {
           if (!trimmed || !trimmed.startsWith('data: ')) continue;
           try {
             const data = JSON.parse(trimmed.slice(6));
+            
+            // Check if there is provider switching status
+            if (data.status) {
+              setProviderStatus(data.status);
+            }
+
             if (data.text !== undefined && data.text !== null) {
-              console.log('Verified streaming content is not empty/null/undefined:', data.text);
-              acc += data.text;
-              console.log('Appended chunk to accumulated content:', acc);
+              // Hide inner markdown provider status to keep display beautiful
+              let chunkText = data.text;
+              if (chunkText.includes('AI service temporarily busy. Switching providers...')) {
+                setProviderStatus('AI service temporarily busy. Switching providers...');
+              }
+              acc += chunkText;
               setMessages((m) => {
                 const copy = [...m];
-                const isImmutable = copy !== m && copy[copy.length - 1] !== m[m.length - 1];
-                console.log('React state update is immutable:', isImmutable);
                 copy[copy.length - 1] = { role: 'assistant', content: acc };
-                console.log('Chat state update (messages state):', copy);
                 return copy;
               });
             }
@@ -97,60 +124,105 @@ export default function ChatInterface() {
         }
       }
     } catch (e) {
+      setActiveError(true);
+      const friendlyError = e.message.includes('Failed to fetch')
+        ? 'Network Connection lost. Please ensure the backend is running and try again.'
+        : `Error: ${e.message}`;
+      
       setMessages((m) => {
         const copy = [...m];
-        const isImmutable = copy !== m && copy[copy.length - 1] !== m[m.length - 1];
-        console.log('React error state update is immutable:', isImmutable);
-        copy[copy.length - 1] = { role: 'assistant', content: `Error: ${e.message}. Please sign in and try again.` };
-        console.log('Chat error state update (messages state):', copy);
+        copy[copy.length - 1] = { 
+          role: 'assistant', 
+          content: friendlyError 
+        };
         return copy;
       });
+      showToast(friendlyError, 'error');
     } finally {
       setStreaming(false);
-      console.log('Streaming loading state cleared');
+    }
+  };
+
+  const handleRetry = () => {
+    if (lastUserPrompt) {
+      send(lastUserPrompt);
     }
   };
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] flex-col rounded-xl border" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)' }}>
+    <div className="flex h-[calc(100vh-12rem)] flex-col rounded-xl border relative" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)' }}>
+      {/* Dynamic Provider Switching Alert */}
+      {providerStatus && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold shadow-md animate-pulse border bg-amber-950/70 border-amber-500/30 text-amber-300">
+          <span className="h-2 w-2 rounded-full bg-amber-400" />
+          {providerStatus}
+        </div>
+      )}
+
+      {/* Message List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
-            {m.role === 'assistant' && (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium" style={{ background: 'var(--gold)', color: 'var(--btn-on-accent)' }}>Lex</div>
-            )}
-            <div
-              className="max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed"
-              style={{
-                background: m.role === 'user' ? 'var(--gold)' : 'var(--bg-overlay)',
-                color: m.role === 'user' ? 'var(--btn-on-accent)' : 'var(--text-primary)',
-              }}
-            >
-              {m.role === 'assistant' ? (
-                m.content ? (
-                  <StreamingText text={m.content} speed={10} />
-                ) : streaming && i === messages.length - 1 ? (
-                  <div className="flex gap-1 py-1.5 items-center">
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDuration: '1s' }}></span>
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDelay: '0.2s', animationDuration: '1s' }}></span>
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDelay: '0.4s', animationDuration: '1s' }}></span>
-                  </div>
-                ) : (
-                  ''
-                )
-              ) : (
-                m.content
+        {messages.map((m, i) => {
+          const isError = m.role === 'assistant' && (m.content.startsWith('Error:') || m.content.startsWith('Network Connection'));
+          return (
+            <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
+              {m.role === 'assistant' && (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold" style={{ background: 'var(--gold)', color: 'var(--btn-on-accent)' }}>Lex</div>
               )}
+              <div
+                className="max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed relative group"
+                style={{
+                  background: m.role === 'user' ? 'var(--gold)' : isError ? 'rgba(217, 79, 61, 0.1)' : 'var(--bg-overlay)',
+                  border: isError ? '1px solid rgba(217, 79, 61, 0.2)' : 'none',
+                  color: m.role === 'user' ? 'var(--btn-on-accent)' : isError ? '#f87171' : 'var(--text-primary)',
+                }}
+              >
+                {m.role === 'assistant' ? (
+                  m.content ? (
+                    <div>
+                      <StreamingText text={m.content} speed={8} />
+                      {isError && (
+                        <button
+                          type="button"
+                          onClick={handleRetry}
+                          className="mt-3 flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors bg-neutral-900 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                        >
+                          <Icon name="refresh" size={14} />
+                          Retry Prompt
+                        </button>
+                      )}
+                    </div>
+                  ) : streaming && i === messages.length - 1 ? (
+                    <div className="flex gap-1 py-1.5 items-center">
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDuration: '1s' }}></span>
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDelay: '0.2s', animationDuration: '1s' }}></span>
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDelay: '0.4s', animationDuration: '1s' }}></span>
+                    </div>
+                  ) : (
+                    ''
+                  )
+                ) : (
+                  m.content
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={endRef} />
       </div>
+
+      {/* Message Input & Quick Replies */}
       <div className="border-t p-3" style={{ borderColor: 'var(--border-dim)' }}>
         <div className="mb-2 flex flex-wrap gap-2">
           {QUICK.map((q) => (
-            <button key={q} type="button" onClick={() => send(q)} className="rounded-full border px-3 py-1 text-xs" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
-              {q.slice(0, 40)}…
+            <button
+              key={q}
+              type="button"
+              disabled={streaming}
+              onClick={() => send(q)}
+              className="rounded-full border px-3 py-1 text-xs transition-colors hover:bg-neutral-900"
+              style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
+            >
+              {q}
             </button>
           ))}
         </div>
@@ -161,16 +233,20 @@ export default function ChatInterface() {
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
             rows={2}
             placeholder="Ask Lex about Indian family law…"
-            className="flex-1 resize-none rounded-lg border px-4 py-2 text-sm"
+            className="flex-1 resize-none rounded-lg border px-4 py-2.5 text-sm"
             style={{ background: 'var(--bg-raised)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
           />
           <button
             type="button"
-            disabled={streaming}
+            disabled={streaming || !input.trim()}
             onClick={() => send()}
-            className="btn-primary rounded-lg px-4 disabled:opacity-50"
+            className="btn-primary rounded-lg px-5 disabled:opacity-50"
           >
-            {streaming ? '…' : 'Send'}
+            {streaming ? (
+              <span className="flex h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              'Send'
+            )}
           </button>
         </div>
       </div>

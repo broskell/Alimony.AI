@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../ui/Icon';
 
+import { useAppStore } from '../../store/useAppStore';
+
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh', 'Chhattisgarh',
   'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
@@ -29,10 +31,22 @@ const defaultForm = {
 export default function AlimonyForm({ onCalculate, loading }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(defaultForm);
+  const { showToast } = useAppStore();
 
   const update = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
-  const submit = () => onCalculate(form);
+  const submit = () => {
+    if (form.yourIncome < 0 || form.spouseIncome < 0) {
+      showToast('Income values cannot be negative.', 'warning');
+      return;
+    }
+    if (form.marriageYears < 1) {
+      showToast('Marriage duration must be at least 1 year.', 'warning');
+      return;
+    }
+    onCalculate(form);
+  };
+
 
   return (
     <div className="mx-auto max-w-2xl">
