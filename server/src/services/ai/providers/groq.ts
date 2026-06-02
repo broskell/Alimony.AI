@@ -1,4 +1,4 @@
-import type { GenerateOptions } from './gemini.ts';
+import type { GenerateOptions } from './gemini';
 
 export async function generateResponse(options: GenerateOptions): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
@@ -14,7 +14,7 @@ export async function generateResponse(options: GenerateOptions): Promise<string
   if (options.messages && options.messages.length > 0) {
     formattedMessages = [
       { role: 'system', content: systemPrompt },
-      ...options.messages.map((m) => ({
+      ...options.messages.map((m: { role: string; content: string }) => ({
         role: m.role === 'assistant' ? 'assistant' : 'user',
         content: m.content,
       })),

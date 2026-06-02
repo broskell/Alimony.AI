@@ -1,4 +1,4 @@
-import type { GenerateOptions } from './gemini.ts';
+import type { GenerateOptions } from './gemini';
 
 export async function generateResponse(options: GenerateOptions): Promise<string> {
   const promptText = options.prompt || '';

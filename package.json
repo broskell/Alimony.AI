@@ -1,6 +1,7 @@
 {
   "name": "alimony-ai-monorepo",
   "private": true,
+  "type": "module",
   "workspaces": [
     "client",
     "server"

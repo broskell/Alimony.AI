@@ -4,10 +4,12 @@ export interface GenerateOptions {
   prompt?: string;
   messages?: Array<{ role: string; content: string }>;
   systemInstruction?: string;
+  systemPrompt?: string;
   maxOutputTokens?: number;
   temperature?: number;
   stream?: boolean;
   onChunk?: (text: string) => void;
+  model?: string;
 }
 
 export async function generateResponse(options: GenerateOptions): Promise<string> {
@@ -16,12 +18,12 @@ export async function generateResponse(options: GenerateOptions): Promise<string
     throw new Error('Gemini API key is not configured');
   }
 
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const modelName = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   const genAI = new GoogleGenerativeAI(apiKey);
 
   const model = genAI.getGenerativeModel({
     model: modelName,
-    systemInstruction: options.systemInstruction,
+    systemInstruction: options.systemInstruction || options.systemPrompt,
   });
 
   const maxTokens = options.maxOutputTokens || 1024;
