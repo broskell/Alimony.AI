@@ -1,4 +1,4 @@
-import { generateResponse } from './ai/index';
+import { generateResponse } from './ai/index.js';
 
 const SYSTEM = `You are an Indian family law specialist AI assistant named Lex.
 You specialize in: Hindu Marriage Act 1955, CrPC Section 125, Protection of Women from DV Act 2005,

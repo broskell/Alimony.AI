@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/app.js",
     "start": "tsx src/app.js",
+    "build": "tsc",
     "db:migrate": "prisma migrate dev",
     "db:seed": "node prisma/seed.js",
     "db:generate": "prisma generate"

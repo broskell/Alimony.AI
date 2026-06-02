@@ -1,8 +1,8 @@
-import { generateResponse as geminiGenerate } from './providers/gemini';
-import type { GenerateOptions } from './providers/gemini';
+import { generateResponse as geminiGenerate } from './providers/gemini.js';
+import type { GenerateOptions } from './providers/gemini.js';
 
-import { generateResponse as groqGenerate } from './providers/groq';
-import { generateResponse as fallbackGenerate } from './providers/fallback';
+import { generateResponse as groqGenerate } from './providers/groq.js';
+import { generateResponse as fallbackGenerate } from './providers/fallback.js';
 
 
 export async function generateResponse(options: GenerateOptions): Promise<string> {
