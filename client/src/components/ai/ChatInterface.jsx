@@ -50,9 +50,7 @@ export default function ChatInterface() {
     setMessages((m) => [...m, placeholder]);
 
     try {
-      const isLocal = typeof window !== 'undefined' && 
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-      const base = isLocal ? (import.meta.env.VITE_API_URL || '/api') : '/api';
+      const base = import.meta.env.VITE_API_URL || '/api';
       const res = await fetch(`${base}/ai/chat`, {
         method: 'POST',
         headers: {
