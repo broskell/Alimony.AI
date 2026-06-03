@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
@@ -12,8 +11,6 @@ import aiRoutes from './routes/ai.js';
 import libraryRoutes from './routes/library.js';
 import consultationRoutes from './routes/consultations.js';
 
-dotenv.config();
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
@@ -22,6 +19,21 @@ app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
+
+app.get('/api/debug-env', (_, res) => {
+  res.json({
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    databaseUrlHost: process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || null
+  });
+});
+
+app.get('/api/debug-db', (_, res) => {
+  res.json({
+    databaseUrlExists: !!process.env.DATABASE_URL,
+    databaseHost: process.env.DATABASE_URL?.match(/@([^\/?]+)/)?.[1] || null,
+    nodeEnv: process.env.NODE_ENV
+  });
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/calculator', calculatorRoutes);

@@ -139,7 +139,7 @@ export default function Landing() {
                     </div>
                     <div className="flex gap-2">
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'var(--gold)', color: 'var(--btn-on-accent)' }}>L</div>
-                      <div className="rounded-lg rounded-tl-none p-3 text-[11px] leading-relaxed border bg-neutral-900/60" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                      <div className="rounded-lg rounded-tl-none p-3 text-[11px] leading-relaxed border" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
                         Under Section 24 HMA, the court may grant interim maintenance to a spouse who is unable to support themselves during litigation...
                         <span className="inline-block h-3 w-1.5 animate-pulse ml-0.5" style={{ background: 'var(--gold)' }} />
                       </div>
@@ -149,7 +149,7 @@ export default function Landing() {
 
                 {f.id === 'lawyer' && (
                   <div className="flex flex-col gap-3">
-                    <div className="rounded-lg border p-3 flex items-center justify-between shadow-sm bg-neutral-900/30" style={{ borderColor: 'var(--border-subtle)' }}>
+                    <div className="rounded-lg border p-3 flex items-center justify-between shadow-sm" style={{ background: 'var(--bg-base)', borderColor: 'var(--border-subtle)' }}>
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs" style={{ background: 'linear-gradient(135deg, var(--gold), #5a4010)', color: 'var(--text-primary)' }}>AS</div>
                         <div>
@@ -168,7 +168,7 @@ export default function Landing() {
                         <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Verified</span>
                       </div>
                     </div>
-                    <div className="rounded-lg border p-3 flex items-center justify-between opacity-60 bg-neutral-900/30" style={{ borderColor: 'var(--border-subtle)' }}>
+                    <div className="rounded-lg border p-3 flex items-center justify-between opacity-60" style={{ background: 'var(--bg-base)', borderColor: 'var(--border-subtle)' }}>
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs" style={{ background: 'linear-gradient(135deg, var(--text-secondary), #333)', color: 'var(--text-primary)' }}>PM</div>
                         <div>
@@ -191,7 +191,7 @@ export default function Landing() {
 
                 {f.id === 'track' && (
                   <div className="flex flex-col gap-2 relative pl-4">
-                    <div className="absolute left-[20px] top-2 bottom-2 w-[1px] bg-neutral-800" />
+                    <div className="absolute left-[20px] top-2 bottom-2 w-[1px]" style={{ background: 'var(--border-strong)' }} />
                     {[
                       { title: 'Matrimonial Petition Filed', desc: 'Delhi Family Court', status: 'completed' },
                       { title: 'Rajnesh v Neha Affidavit', desc: 'Verified financials submitted', status: 'completed' },
