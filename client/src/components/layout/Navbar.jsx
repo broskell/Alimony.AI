@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ui/ThemeToggle';
 import Icon from '../ui/Icon';
+import { Sheet, SheetContent } from '../ui/sheet';
+import MobileSidebarContent from './MobileSidebarContent';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const NAV = [
@@ -100,41 +101,11 @@ export default function Navbar({ minimal = false, onMenuClick }) {
         )}
       </div>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="fixed right-0 top-0 z-50 flex h-full w-72 flex-col gap-4 p-6 md:hidden"
-              style={{ background: 'var(--bg-surface)', borderLeft: '1px solid var(--border-subtle)' }}
-            >
-              {NAV.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-base font-medium"
-                  style={{
-                    color: pathname.startsWith(item.to) ? 'var(--gold)' : 'var(--text-primary)',
-                  }}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="w-72 max-w-[85vw] p-0">
+          <MobileSidebarContent onClose={() => setMobileOpen(false)} />
+        </SheetContent>
+      </Sheet>
     </nav>
   );
 }

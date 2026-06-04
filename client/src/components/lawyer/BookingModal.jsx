@@ -61,8 +61,9 @@ export default function BookingModal({ lawyer, open, onClose }) {
               <input
                 type="datetime-local"
                 value={form.date}
+                disabled={loading}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full rounded-lg border px-4 py-3"
+                className="w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
               />
               <div className="flex gap-2">
@@ -70,8 +71,9 @@ export default function BookingModal({ lawyer, open, onClose }) {
                   <button
                     key={m.id}
                     type="button"
+                    disabled={loading}
                     onClick={() => setForm({ ...form, mode: m.id })}
-                    className="flex flex-1 flex-col items-center gap-1 rounded-lg border py-2 text-sm"
+                    className="flex flex-1 flex-col items-center gap-1 rounded-lg border py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                     style={{
                       borderColor: form.mode === m.id ? 'var(--gold)' : 'var(--border-subtle)',
                       background: form.mode === m.id ? 'var(--accent-glow)' : 'transparent',
@@ -86,9 +88,10 @@ export default function BookingModal({ lawyer, open, onClose }) {
               <textarea
                 placeholder="Notes for the advocate..."
                 value={form.notes}
+                disabled={loading}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 rows={3}
-                className="w-full rounded-lg border px-4 py-3"
+                className="w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
               />
             </div>

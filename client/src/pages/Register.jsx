@@ -182,7 +182,7 @@ export default function Register() {
   return (
     <div className="flex min-h-screen flex-col lg:flex-row" style={{ background: 'var(--bg-base)' }}>
       {/* LEFT SIDE - Split screen brand layout (50%) */}
-      <div className="relative flex flex-col justify-between overflow-hidden p-8 lg:w-1/2 lg:p-16" style={{ background: 'radial-gradient(circle at 10% 10%, #1a1510, #080810)' }}>
+      <div className="relative flex flex-col justify-between overflow-hidden p-8 lg:w-1/2 lg:p-16" style={{ background: 'var(--hero-gradient)' }}>
         {/* Subtle Animated Glow Effect */}
         <div className="absolute inset-0 pointer-events-none opacity-20">
           <motion.div 
@@ -332,10 +332,11 @@ export default function Register() {
                       <input
                         type="text"
                         value={form.firstName}
+                        disabled={loading}
                         onChange={(e) => updateField('firstName', e.target.value)}
                         placeholder="Jane"
                         required
-                        className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                        className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                       />
                     </div>
@@ -344,10 +345,11 @@ export default function Register() {
                       <input
                         type="text"
                         value={form.lastName}
+                        disabled={loading}
                         onChange={(e) => updateField('lastName', e.target.value)}
                         placeholder="Doe"
                         required
-                        className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                        className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                       />
                     </div>
@@ -358,10 +360,11 @@ export default function Register() {
                     <input
                       type="email"
                       value={form.email}
+                      disabled={loading}
                       onChange={(e) => updateField('email', e.target.value)}
                       placeholder="jane.doe@example.com"
                       required
-                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                     />
                   </div>
@@ -381,8 +384,9 @@ export default function Register() {
                     <label className="block text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>State</label>
                     <select
                       value={form.state}
+                      disabled={loading}
                       onChange={(e) => updateField('state', e.target.value)}
-                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                     >
                       {INDIAN_STATES.map((s) => (
@@ -395,8 +399,9 @@ export default function Register() {
                     <label className="block text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-secondary)' }}>City / Region</label>
                     <select
                       value={form.city}
+                      disabled={loading}
                       onChange={(e) => updateField('city', e.target.value)}
-                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                     >
                       <option value="">Select City...</option>
@@ -422,17 +427,18 @@ export default function Register() {
                     <input
                       type="password"
                       value={form.password}
+                      disabled={loading}
                       onChange={(e) => updateField('password', e.target.value)}
                       placeholder="••••••••"
                       required
-                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                     />
                     {form.password && (
                       <div className="mt-2 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
                           <span style={{ color: 'var(--text-secondary)' }}>Password strength:</span>
-                          <span className={`font-semibold ${strength.score === 1 ? 'text-red-400' : strength.score === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
+                          <span className={`font-semibold ${strength.score === 1 ? 'text-red-600 dark:text-red-400' : strength.score === 2 ? 'text-amber-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}`}>
                             {strength.label}
                           </span>
                         </div>
@@ -448,14 +454,15 @@ export default function Register() {
                     <input
                       type="password"
                       value={form.confirmPassword}
+                      disabled={loading}
                       onChange={(e) => updateField('confirmPassword', e.target.value)}
                       placeholder="••••••••"
                       required
-                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)]"
+                      className="w-full rounded-lg border px-4 py-3 text-sm focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                     />
                     {form.confirmPassword && form.password !== form.confirmPassword && (
-                      <p className="mt-1 text-xs text-red-400">Passwords do not match</p>
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">Passwords do not match</p>
                     )}
                   </div>
                 </motion.div>
@@ -467,8 +474,9 @@ export default function Register() {
               {step > 1 && (
                 <button
                   type="button"
+                  disabled={loading}
                   onClick={handleBack}
-                  className="btn-ghost flex-1 rounded-lg py-3 text-sm font-medium transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800/40 cursor-pointer"
+                  className="btn-ghost flex-1 rounded-lg py-3 text-sm font-medium transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800/40 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                 >
                   Back
                 </button>
@@ -477,8 +485,9 @@ export default function Register() {
               {step < 3 ? (
                 <button
                   type="button"
+                  disabled={loading}
                   onClick={handleNext}
-                  className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium cursor-pointer"
+                  className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                 >
                   Continue
                 </button>
@@ -486,7 +495,7 @@ export default function Register() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium disabled:opacity-50 cursor-pointer"
+                  className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-none"
                 >
                   {loading ? 'Registering…' : 'Complete Setup →'}
                 </button>
@@ -505,8 +514,9 @@ export default function Register() {
 
               <button
                 type="button"
+                disabled={loading}
                 onClick={handleGoogleSignup}
-                className="flex w-full items-center justify-center gap-3 rounded-lg border px-4 py-3 text-sm font-semibold transition-all hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer"
+                className="flex w-full items-center justify-center gap-3 rounded-lg border px-4 py-3 text-sm font-semibold transition-all hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                 style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
               >
                 <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">

@@ -35,18 +35,36 @@ export default function AlimonyForm({ onCalculate, loading }) {
 
   const update = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
+  const handleNumberChange = (key, rawValue) => {
+    // Strip leading zeros
+    let val = rawValue.replace(/^0+/, '');
+    if (val === '') {
+      if (/^0+$/.test(rawValue)) {
+        update(key, 0);
+      } else {
+        update(key, '');
+      }
+    } else {
+      update(key, parseInt(val, 10));
+    }
+  };
+
   const submit = () => {
-    if (form.yourIncome < 0 || form.spouseIncome < 0) {
+    const cleanForm = {
+      ...form,
+      yourIncome: form.yourIncome === '' ? 0 : Number(form.yourIncome),
+      spouseIncome: form.spouseIncome === '' ? 0 : Number(form.spouseIncome),
+    };
+    if (cleanForm.yourIncome < 0 || cleanForm.spouseIncome < 0) {
       showToast('Income values cannot be negative.', 'warning');
       return;
     }
-    if (form.marriageYears < 1) {
+    if (cleanForm.marriageYears < 1) {
       showToast('Marriage duration must be at least 1 year.', 'warning');
       return;
     }
-    onCalculate(form);
+    onCalculate(cleanForm);
   };
-
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -63,7 +81,7 @@ export default function AlimonyForm({ onCalculate, loading }) {
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div key="s1" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-6">
-            <h2 className="text-2xl">Basic Information</h2>
+            <h2 className="text-2xl" style={{ color: 'var(--text-primary)' }}>Basic Information</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
                 { val: 'claimant', label: 'Seeking maintenance', icon: 'person' },
@@ -72,8 +90,9 @@ export default function AlimonyForm({ onCalculate, loading }) {
                 <button
                   key={r.val}
                   type="button"
+                  disabled={loading}
                   onClick={() => update('role', r.val)}
-                  className="flex items-center gap-3 rounded-lg border p-4 text-left text-sm transition-all"
+                  className="flex items-center gap-3 rounded-lg border p-4 text-left text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                   style={{
                     borderColor: form.role === r.val ? 'var(--gold)' : 'var(--border-subtle)',
                     background: form.role === r.val ? 'var(--bg-overlay)' : 'var(--bg-card)',
@@ -92,8 +111,9 @@ export default function AlimonyForm({ onCalculate, loading }) {
                   <button
                     key={a}
                     type="button"
+                    disabled={loading}
                     onClick={() => update('act', a)}
-                    className="rounded-lg border px-3 py-2 text-sm"
+                    className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
                     style={{
                       borderColor: form.act === a ? 'var(--gold)' : 'var(--border-subtle)',
                       color: form.act === a ? 'var(--gold)' : 'var(--text-secondary)',
@@ -108,8 +128,9 @@ export default function AlimonyForm({ onCalculate, loading }) {
               <label className="label-chip mb-2 block" style={{ color: 'var(--text-muted)' }}>State</label>
               <select
                 value={form.state}
+                disabled={loading}
                 onChange={(e) => update('state', e.target.value)}
-                className="w-full rounded-lg border px-4 py-3"
+                className="w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
               >
                 {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -124,14 +145,16 @@ export default function AlimonyForm({ onCalculate, loading }) {
                 min={1}
                 max={40}
                 value={form.marriageYears}
+                disabled={loading}
                 onChange={(e) => update('marriageYears', +e.target.value)}
-                className="w-full accent-[var(--gold)]"
+                className="w-full accent-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <button 
               type="button" 
+              disabled={loading}
               onClick={() => setStep(2)} 
-              className="btn-primary w-full rounded-lg py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] mt-8"
+              className="btn-primary w-full rounded-lg py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] mt-8 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
             >
               Continue →
             </button>
@@ -140,7 +163,7 @@ export default function AlimonyForm({ onCalculate, loading }) {
 
         {step === 2 && (
           <motion.div key="s2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-6">
-            <h2 className="text-2xl">Financial Details</h2>
+            <h2 className="text-2xl" style={{ color: 'var(--text-primary)' }}>Financial Details</h2>
             {[
               { key: 'yourIncome', label: 'Your net monthly income (₹)' },
               { key: 'spouseIncome', label: "Spouse's net monthly income (₹)" },
@@ -150,8 +173,9 @@ export default function AlimonyForm({ onCalculate, loading }) {
                 <input
                   type="number"
                   value={form[f.key]}
-                  onChange={(e) => update(f.key, +e.target.value)}
-                  className="mono w-full rounded-lg border px-4 py-3"
+                  disabled={loading}
+                  onChange={(e) => handleNumberChange(f.key, e.target.value)}
+                  className="mono w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                 />
               </div>
@@ -159,18 +183,38 @@ export default function AlimonyForm({ onCalculate, loading }) {
             <div>
               <label className="label-chip mb-2 block" style={{ color: 'var(--text-muted)' }}>Dependent children</label>
               <div className="flex items-center gap-4">
-                <button type="button" onClick={() => update('children', Math.max(0, form.children - 1))} className="flex h-10 w-10 items-center justify-center rounded-lg border" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} aria-label="Decrease children">
+                <button 
+                  type="button" 
+                  disabled={loading || form.children <= 0}
+                  onClick={() => update('children', Math.max(0, form.children - 1))} 
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer" 
+                  style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} 
+                  aria-label="Decrease children"
+                >
                   <Icon name="remove" size={20} />
                 </button>
                 <span className="mono text-2xl" style={{ color: 'var(--gold)' }}>{form.children}</span>
-                <button type="button" onClick={() => update('children', Math.min(5, form.children + 1))} className="flex h-10 w-10 items-center justify-center rounded-lg border" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} aria-label="Increase children">
+                <button 
+                  type="button" 
+                  disabled={loading || form.children >= 5}
+                  onClick={() => update('children', Math.min(5, form.children + 1))} 
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer" 
+                  style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} 
+                  aria-label="Increase children"
+                >
                   <Icon name="add" size={20} />
                 </button>
               </div>
             </div>
             <div>
               <label className="label-chip mb-2 block" style={{ color: 'var(--text-muted)' }}>Standard of living</label>
-              <select value={form.standardOfLiving} onChange={(e) => update('standardOfLiving', e.target.value)} className="w-full rounded-lg border px-4 py-3" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+              <select 
+                value={form.standardOfLiving} 
+                disabled={loading}
+                onChange={(e) => update('standardOfLiving', e.target.value)} 
+                className="w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed" 
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+              >
                 <option value="basic">Basic</option>
                 <option value="middle">Middle Class</option>
                 <option value="upper">Upper Middle</option>
@@ -179,7 +223,13 @@ export default function AlimonyForm({ onCalculate, loading }) {
             </div>
             <div>
               <label className="label-chip mb-2 block" style={{ color: 'var(--text-muted)' }}>Career sacrifice</label>
-              <select value={form.careerSacrifice} onChange={(e) => update('careerSacrifice', e.target.value)} className="w-full rounded-lg border px-4 py-3" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+              <select 
+                value={form.careerSacrifice} 
+                disabled={loading}
+                onChange={(e) => update('careerSacrifice', e.target.value)} 
+                className="w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed" 
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+              >
                 <option value="none">None</option>
                 <option value="partial">Partial (reduced hours)</option>
                 <option value="full">Full (gave up career)</option>
@@ -188,15 +238,17 @@ export default function AlimonyForm({ onCalculate, loading }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 mt-8">
               <button 
                 type="button" 
+                disabled={loading}
                 onClick={() => setStep(1)} 
-                className="btn-ghost flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 hover:bg-neutral-800/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)]"
+                className="btn-ghost flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 hover:bg-neutral-800/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
               >
                 ← Back
               </button>
               <button 
                 type="button" 
+                disabled={loading}
                 onClick={() => setStep(3)} 
-                className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)]"
+                className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
               >
                 Continue →
               </button>
@@ -206,7 +258,7 @@ export default function AlimonyForm({ onCalculate, loading }) {
 
         {step === 3 && (
           <motion.div key="s3" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-6">
-            <h2 className="text-2xl">Case Factors</h2>
+            <h2 className="text-2xl" style={{ color: 'var(--text-primary)' }}>Case Factors</h2>
             {[
               { key: 'domesticViolence', label: 'Domestic violence / cruelty', opts: [['none', 'None'], ['cruelty', 'Cruelty (IPC 498A)'], ['abuse', 'Abuse']] },
               { key: 'health', label: 'Health conditions', opts: [['healthy', 'Both healthy'], ['illness', 'Claimant illness'], ['disability', 'Claimant disability']] },
@@ -215,7 +267,13 @@ export default function AlimonyForm({ onCalculate, loading }) {
             ].map((field) => (
               <div key={field.key}>
                 <label className="label-chip mb-2 block" style={{ color: 'var(--text-muted)' }}>{field.label}</label>
-                <select value={form[field.key]} onChange={(e) => update(field.key, e.target.value)} className="w-full rounded-lg border px-4 py-3" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+                <select 
+                  value={form[field.key]} 
+                  disabled={loading}
+                  onChange={(e) => update(field.key, e.target.value)} 
+                  className="w-full rounded-lg border px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+                >
                   {field.opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
               </div>
@@ -223,8 +281,9 @@ export default function AlimonyForm({ onCalculate, loading }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 mt-8">
               <button 
                 type="button" 
+                disabled={loading}
                 onClick={() => setStep(2)} 
-                className="btn-ghost flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 hover:bg-neutral-800/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)]"
+                className="btn-ghost flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 hover:bg-neutral-800/40 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
               >
                 ← Back
               </button>
@@ -232,7 +291,7 @@ export default function AlimonyForm({ onCalculate, loading }) {
                 type="button"
                 disabled={loading}
                 onClick={submit}
-                className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 rounded-lg py-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-base)] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
               >
                 {loading ? 'Calculating…' : 'Calculate Result →'}
               </button>

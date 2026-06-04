@@ -101,7 +101,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen flex-col lg:flex-row" style={{ background: 'var(--bg-base)' }}>
       {/* LEFT SIDE - Split screen brand layout (50%) */}
-      <div className="relative flex flex-col justify-between overflow-hidden p-8 lg:w-1/2 lg:p-16" style={{ background: 'radial-gradient(circle at 10% 10%, #1a1510, #080810)' }}>
+      <div className="relative flex flex-col justify-between overflow-hidden p-8 lg:w-1/2 lg:p-16" style={{ background: 'var(--hero-gradient)' }}>
         {/* Subtle Animated Glow Effect */}
         <div className="absolute inset-0 pointer-events-none opacity-20">
           <motion.div 
@@ -209,11 +209,12 @@ export default function Login() {
                   id="email"
                   type="email"
                   value={email}
+                  disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   required
                   autoComplete="email"
-                  className="w-full rounded-lg border px-4 py-3 text-sm transition-all focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
+                  className="w-full rounded-lg border px-4 py-3 text-sm transition-all focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                 />
               </div>
@@ -224,31 +225,34 @@ export default function Login() {
                   id="password"
                   type="password"
                   value={password}
+                  disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="w-full rounded-lg border px-4 py-3 text-sm transition-all focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)]"
+                  className="w-full rounded-lg border px-4 py-3 text-sm transition-all focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                 />
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer select-none" style={{ color: 'var(--text-secondary)' }}>
+              <label className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed" style={{ color: 'var(--text-secondary)' }}>
                 <input
                   type="checkbox"
                   checked={rememberMe}
+                  disabled={loading}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-neutral-700 bg-neutral-900 text-[var(--gold)] focus:ring-offset-0 focus:ring-0"
+                  className="rounded border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-[var(--gold)] focus:ring-offset-0 focus:ring-0 cursor-pointer disabled:cursor-not-allowed"
                 />
                 Remember Me
               </label>
 
               <button
                 type="button"
+                disabled={loading}
                 onClick={handleForgotPassword}
-                className="text-xs sm:text-sm transition-colors hover:underline"
+                className="text-xs sm:text-sm transition-colors hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ color: 'var(--gold)' }}
               >
                 Forgot Password?
@@ -259,7 +263,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary flex w-full justify-center rounded-lg py-3.5 text-sm font-medium transition-all duration-200 disabled:opacity-50"
+                className="btn-primary flex w-full justify-center rounded-lg py-3.5 text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in…' : 'Sign In'}
               </button>
@@ -273,8 +277,9 @@ export default function Login() {
               {/* Official Google Brand Button */}
               <button
                 type="button"
+                disabled={loading}
                 onClick={handleGoogleLogin}
-                className="flex w-full items-center justify-center gap-3 rounded-lg border px-4 py-3 text-sm font-semibold transition-all hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer"
+                className="flex w-full items-center justify-center gap-3 rounded-lg border px-4 py-3 text-sm font-semibold transition-all hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
               >
                 <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">

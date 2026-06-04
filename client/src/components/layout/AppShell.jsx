@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Toast from '../ui/Toast';
+import { Sheet, SheetContent } from '../ui/sheet';
+import MobileSidebarContent from './MobileSidebarContent';
 
 const container = {
   hidden: { opacity: 0 },
@@ -20,6 +22,21 @@ const item = {
 
 export default function AppShell({ withSidebar = true }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Auto-close mobile drawer on route navigation changes
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
 
   if (!withSidebar) {
     return (
@@ -33,11 +50,16 @@ export default function AppShell({ withSidebar = true }) {
 
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--bg-base)' }}>
-      <Sidebar />
+      {/* Desktop sidebar: only mount when viewport width is 1024px or wider */}
+      {!isMobile && <Sidebar />}
+
       <div className="flex flex-1 flex-col">
-        <div className="lg:hidden">
-          <Navbar minimal onMenuClick={() => setMobileSidebarOpen(true)} />
-        </div>
+        {/* Mobile Navbar: only mount when viewport width is below 1024px */}
+        {isMobile && (
+          <div className="lg:hidden">
+            <Navbar minimal onMenuClick={() => setMobileSidebarOpen(true)} />
+          </div>
+        )}
         <motion.main
           variants={container}
           initial="hidden"
@@ -50,31 +72,14 @@ export default function AppShell({ withSidebar = true }) {
         </motion.main>
       </div>
 
-      <AnimatePresence>
-        {mobileSidebarOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-              onClick={() => setMobileSidebarOpen(false)}
-            />
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed bottom-0 left-0 top-0 z-50 flex w-64 flex-col lg:hidden"
-            >
-              <Sidebar
-                className="flex h-full w-full flex-col p-4"
-                onLinkClick={() => setMobileSidebarOpen(false)}
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {isMobile && (
+        <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+          <SheetContent side="left" className="w-72 max-w-[85vw] p-0">
+            <MobileSidebarContent onClose={() => setMobileSidebarOpen(false)} />
+          </SheetContent>
+        </Sheet>
+      )}
+
       <Toast />
     </div>
   );

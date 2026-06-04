@@ -228,7 +228,7 @@ export default function ChatInterface() {
                 style={{
                   background: m.role === 'user' ? 'var(--gold)' : isError ? 'rgba(217, 79, 61, 0.1)' : 'var(--bg-overlay)',
                   border: isError ? '1px solid rgba(217, 79, 61, 0.2)' : 'none',
-                  color: m.role === 'user' ? 'var(--btn-on-accent)' : isError ? '#f87171' : 'var(--text-primary)',
+                  color: m.role === 'user' ? 'var(--btn-on-accent)' : isError ? 'var(--text-error)' : 'var(--text-primary)',
                 }}
               >
                 {m.role === 'assistant' ? (
@@ -239,7 +239,7 @@ export default function ChatInterface() {
                         <button
                           type="button"
                           onClick={handleRetry}
-                          className="mt-3 flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors bg-neutral-900 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                          className="mt-3 flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors bg-[var(--bg-card)] border-[var(--border-strong)] text-[var(--text-primary)] hover:bg-[var(--bg-overlay)]"
                         >
                           <Icon name="refresh" size={14} />
                           Retry Prompt
@@ -302,8 +302,7 @@ export default function ChatInterface() {
                   type="button"
                   disabled={streaming}
                   onClick={() => send(q)}
-                  className="rounded-full border px-3 py-1 text-xs transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] cursor-pointer"
-                  style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
+                  className="rounded-full border px-3 py-1 text-xs transition-colors bg-transparent border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-overlay)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                 >
                   {q}
                 </button>
@@ -323,7 +322,7 @@ export default function ChatInterface() {
                 type="button"
                 disabled={streaming || !input.trim()}
                 onClick={() => send()}
-                className="btn-primary rounded-lg px-5 disabled:opacity-50 cursor-pointer"
+                className="btn-primary rounded-lg px-5 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
               >
                 {streaming ? (
                   <span className="flex h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />

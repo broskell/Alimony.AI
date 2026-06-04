@@ -65,8 +65,7 @@ export default function Calculator() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center backdrop-blur-md"
-              style={{ background: 'rgba(8, 8, 16, 0.85)' }}
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center backdrop-blur-md bg-white/80 dark:bg-[#080810]/85"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full mb-4 border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--gold)' }} />
               <motion.p

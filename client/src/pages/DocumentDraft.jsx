@@ -54,11 +54,13 @@ export default function DocumentDraft() {
             <button
               key={t}
               type="button"
+              disabled={loading}
               onClick={() => setType(t)}
-              className="block w-full rounded-lg border px-4 py-3 text-left text-sm"
+              className="block w-full rounded-lg border px-4 py-3 text-left text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
               style={{
                 borderColor: type === t ? 'var(--gold)' : 'var(--border-subtle)',
                 background: type === t ? 'var(--bg-overlay)' : 'var(--bg-card)',
+                color: 'var(--text-primary)',
               }}
             >
               {t}
@@ -71,14 +73,15 @@ export default function DocumentDraft() {
               key={k}
               placeholder={k.charAt(0).toUpperCase() + k.slice(1)}
               value={details[k]}
+              disabled={loading}
               onChange={(e) => setDetails({ ...details, [k]: e.target.value })}
               rows={2}
-              className="w-full rounded-lg border px-4 py-3 text-sm"
+              className="w-full rounded-lg border px-4 py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
             />
           ))}
         </div>
-        <button type="button" disabled={loading} onClick={generate} className="btn-primary mt-6 w-full rounded-lg py-3">
+        <button type="button" disabled={loading} onClick={generate} className="btn-primary mt-6 w-full rounded-lg py-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer">
           {loading ? 'Generating…' : 'Generate with AI'}
         </button>
       </div>
