@@ -7,15 +7,46 @@ import {
   explainSection,
   briefOnPrecedent,
 } from '../services/geminiService.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, optionalAuth } from '../middleware/auth.js';
 import { aiRateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 const prisma = new PrismaClient();
 
-router.post('/chat', aiRateLimit, requireAuth, async (req, res, next) => {
+const guestLimits = new Map();
+const GUEST_LIMIT = 5;
+const GUEST_WINDOW = 24 * 60 * 60 * 1000;
+
+// Cleanup expired guest limits from memory hourly
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of guestLimits.entries()) {
+    if (now > data.resetTime) {
+      guestLimits.delete(ip);
+    }
+  }
+}, 60 * 60 * 1000);
+
+router.post('/chat', aiRateLimit, optionalAuth, async (req, res, next) => {
   try {
     const { messages, sessionId, userContext } = req.body;
+
+    // Enforce free tier guest limits if not logged in
+    if (!req.user) {
+      const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      const now = Date.now();
+      let record = guestLimits.get(ip);
+      
+      if (!record || now > record.resetTime) {
+        record = { count: 0, resetTime: now + GUEST_WINDOW };
+        guestLimits.set(ip, record);
+      }
+
+      if (record.count >= GUEST_LIMIT) {
+        return res.status(403).json({ error: 'Free tier limit reached. Please sign up or sign in to continue.' });
+      }
+      record.count += 1;
+    }
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -29,7 +60,7 @@ router.post('/chat', aiRateLimit, requireAuth, async (req, res, next) => {
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     res.end();
 
-    if (sessionId) {
+    if (sessionId && req.user) {
       const session = await prisma.chatSession.findFirst({
         where: { id: sessionId, userId: req.user.id },
       });

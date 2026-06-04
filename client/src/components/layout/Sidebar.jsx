@@ -14,12 +14,12 @@ const LINKS = [
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onLinkClick, className }) {
   return (
     <motion.aside
       initial={{ x: -24, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="hidden w-56 shrink-0 flex-col border-r p-4 lg:flex"
+      className={className || "hidden w-56 shrink-0 flex-col border-r p-4 lg:flex"}
       style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-surface)' }}
     >
       <NavLink to="/" className="brand mb-8 block text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -30,6 +30,7 @@ export default function Sidebar() {
           <NavLink
             key={link.to}
             to={link.to}
+            onClick={onLinkClick}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors"
             style={({ isActive }) => ({
               background: isActive ? 'var(--bg-overlay)' : 'transparent',

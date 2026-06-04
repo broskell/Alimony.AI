@@ -13,17 +13,30 @@ const NAV = [
   { to: '/cases', label: 'Cases' },
 ];
 
-export default function Navbar({ minimal = false }) {
+export default function Navbar({ minimal = false, onMenuClick }) {
   const { pathname } = useLocation();
   const { user, logout } = useAuthStore();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <nav className="app-nav sticky top-0 z-50 flex items-center justify-between px-4 py-4 md:px-8">
-      <Link to="/" className="brand text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-        <span style={{ color: 'var(--gold)' }}>Alimony</span>
-        <span>.AI</span>
-      </Link>
+      <div className="flex items-center gap-3">
+        {minimal && onMenuClick && (
+          <button
+            type="button"
+            className="flex lg:hidden mr-1 cursor-pointer"
+            style={{ color: 'var(--text-primary)' }}
+            onClick={onMenuClick}
+            aria-label="Open menu"
+          >
+            <Icon name="menu" size={24} />
+          </button>
+        )}
+        <Link to="/" className="brand text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          <span style={{ color: 'var(--gold)' }}>Alimony</span>
+          <span>.AI</span>
+        </Link>
+      </div>
 
       {!minimal && (
         <div className="hidden items-center gap-8 md:flex">

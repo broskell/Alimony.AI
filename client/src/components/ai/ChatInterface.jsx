@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useAppStore } from '../../store/useAppStore';
 import StreamingText from '../ui/StreamingText';
@@ -23,13 +24,59 @@ export default function ChatInterface() {
   const [providerStatus, setProviderStatus] = useState('');
   const endRef = useRef(null);
 
+  const [freeQueriesLeft, setFreeQueriesLeft] = useState(() => {
+    const savedToken = token || localStorage.getItem('alimony_token');
+    if (savedToken) return 999;
+    
+    const stored = localStorage.getItem('alimony_free_queries');
+    const resetTime = localStorage.getItem('alimony_free_queries_reset');
+    const now = Date.now();
+    
+    if (resetTime && now > parseInt(resetTime)) {
+      localStorage.setItem('alimony_free_queries', '5');
+      localStorage.setItem('alimony_free_queries_reset', (now + 24 * 60 * 60 * 1000).toString());
+      return 5;
+    }
+    
+    if (stored === null) {
+      localStorage.setItem('alimony_free_queries', '5');
+      localStorage.setItem('alimony_free_queries_reset', (now + 24 * 60 * 60 * 1000).toString());
+      return 5;
+    }
+    
+    return parseInt(stored);
+  });
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    const savedToken = token || localStorage.getItem('alimony_token');
+    if (savedToken) {
+      setFreeQueriesLeft(999);
+    } else {
+      const stored = localStorage.getItem('alimony_free_queries');
+      setFreeQueriesLeft(stored !== null ? parseInt(stored) : 5);
+    }
+  }, [token]);
+
   const send = async (text) => {
     const content = text || input.trim();
     if (!content || streaming) return;
+
+    const savedToken = token || localStorage.getItem('alimony_token');
+    if (!savedToken) {
+      if (freeQueriesLeft <= 0) {
+        showToast('Free tier limit reached. Please sign in or sign up to continue.', 'warning');
+        return;
+      }
+      setFreeQueriesLeft((prev) => {
+        const next = Math.max(0, prev - 1);
+        localStorage.setItem('alimony_free_queries', next.toString());
+        return next;
+      });
+    }
 
     // Reset error state and status
     setActiveError(false);
@@ -62,6 +109,14 @@ export default function ChatInterface() {
 
       if (res.status === 429) {
         throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      }
+
+      if (res.status === 403) {
+        if (!savedToken) {
+          setFreeQueriesLeft(0);
+          localStorage.setItem('alimony_free_queries', '0');
+        }
+        throw new Error('Free tier limit reached. Please sign up or sign in to continue.');
       }
 
       if (!res.ok) {
@@ -147,6 +202,8 @@ export default function ChatInterface() {
     }
   };
 
+  const isGuestOverLimit = !token && freeQueriesLeft <= 0;
+
   return (
     <div className="flex h-[calc(100vh-12rem)] flex-col rounded-xl border relative" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)' }}>
       {/* Dynamic Provider Switching Alert */}
@@ -209,44 +266,74 @@ export default function ChatInterface() {
       </div>
 
       {/* Message Input & Quick Replies */}
-      <div className="border-t p-3" style={{ borderColor: 'var(--border-dim)' }}>
-        <div className="mb-2 flex flex-wrap gap-2">
-          {QUICK.map((q) => (
-            <button
-              key={q}
-              type="button"
-              disabled={streaming}
-              onClick={() => send(q)}
-              className="rounded-full border px-3 py-1 text-xs transition-colors hover:bg-neutral-900"
-              style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
-            rows={2}
-            placeholder="Ask Lex about Indian family law…"
-            className="flex-1 resize-none rounded-lg border px-4 py-2.5 text-sm"
-            style={{ background: 'var(--bg-raised)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
-          />
-          <button
-            type="button"
-            disabled={streaming || !input.trim()}
-            onClick={() => send()}
-            className="btn-primary rounded-lg px-5 disabled:opacity-50"
-          >
-            {streaming ? (
-              <span className="flex h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            ) : (
-              'Send'
-            )}
-          </button>
-        </div>
+      <div className="border-t p-3" style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-card)' }}>
+        {isGuestOverLimit ? (
+          <div className="flex flex-col items-center justify-center py-4 text-center space-y-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'rgba(201, 168, 76, 0.15)', color: 'var(--gold)' }}>
+              <Icon name="lock" size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Free Tier Limit Reached</h4>
+              <p className="mt-1 text-xs max-w-sm" style={{ color: 'var(--text-secondary)' }}>
+                You have used your 5 free queries for today. Create a free account to unlock unlimited questions, full chat history, and case document linking.
+              </p>
+            </div>
+            <div className="flex gap-3 w-full max-w-xs">
+              <Link
+                to="/register"
+                className="btn-primary flex-1 text-center rounded-lg py-2.5 text-xs font-semibold cursor-pointer"
+              >
+                Sign Up
+              </Link>
+              <Link
+                to="/login"
+                className="btn-ghost flex-1 text-center rounded-lg py-2.5 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800/40 cursor-pointer"
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-2 flex flex-wrap gap-2">
+              {QUICK.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  disabled={streaming}
+                  onClick={() => send(q)}
+                  className="rounded-full border px-3 py-1 text-xs transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] cursor-pointer"
+                  style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
+                rows={2}
+                placeholder="Ask Lex about Indian family law…"
+                className="flex-1 resize-none rounded-lg border px-4 py-2.5 text-sm"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+              />
+              <button
+                type="button"
+                disabled={streaming || !input.trim()}
+                onClick={() => send()}
+                className="btn-primary rounded-lg px-5 disabled:opacity-50 cursor-pointer"
+              >
+                {streaming ? (
+                  <span className="flex h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  'Send'
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
