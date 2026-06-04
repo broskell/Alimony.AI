@@ -205,3 +205,170 @@ input:focus, textarea:focus, select:focus {
   direction: ltr;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Legal Document Preview Typography Styles */
+#legal-document-preview {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  max-width: 816px;
+  width: 100%;
+  padding: 48px;
+  font-family: "Times New Roman", Georgia, serif !important;
+  line-height: 1.8 !important;
+  min-height: 1154px; /* Approximate A4 height at 816px width */
+  box-sizing: border-box;
+}
+
+#legal-document-preview h1 {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 1.75rem !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 2rem !important;
+  letter-spacing: normal !important;
+  text-transform: uppercase !important;
+  line-height: 1.4 !important;
+}
+
+#legal-document-preview h2 {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 1.25rem !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  letter-spacing: normal !important;
+  line-height: 1.4 !important;
+}
+
+#legal-document-preview h3 {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 1.1rem !important;
+  font-weight: bold !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+  letter-spacing: normal !important;
+  line-height: 1.4 !important;
+}
+
+#legal-document-preview h4, 
+#legal-document-preview h5, 
+#legal-document-preview h6 {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 1rem !important;
+  font-weight: bold !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  letter-spacing: normal !important;
+}
+
+#legal-document-preview p {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 1rem !important;
+  line-height: 1.8 !important;
+  margin-bottom: 1.25rem !important;
+  text-align: justify !important;
+}
+
+#legal-document-preview strong {
+  font-weight: 600 !important;
+}
+
+#legal-document-preview em {
+  font-style: italic !important;
+}
+
+#legal-document-preview ul {
+  list-style-type: disc !important;
+  padding-left: 2.5rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
+#legal-document-preview ol {
+  list-style-type: decimal !important;
+  padding-left: 2.5rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
+#legal-document-preview li {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 1rem !important;
+  line-height: 1.8 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+#legal-document-preview hr {
+  border: none !important;
+  border-top: 1px solid #d1d5db !important;
+  margin: 2rem 0 !important;
+}
+
+#legal-document-preview blockquote {
+  border-left: 3px solid #9ca3af !important;
+  padding-left: 1.5rem !important;
+  margin-left: 0.5rem !important;
+  margin-bottom: 1.25rem !important;
+  font-style: italic !important;
+  color: #4b5563 !important;
+}
+
+/* Responsive adjustment for small viewports */
+@media (max-width: 640px) {
+  #legal-document-preview {
+    padding: 24px !important;
+    min-height: auto !important;
+  }
+}
+
+/* Print Styles: Hide all interactive UI elements on print */
+@media print {
+  /* Set body to white and reset default print margins */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide everything except the element with ref target */
+  .no-print,
+  aside,
+  nav,
+  header,
+  button,
+  .app-nav,
+  input,
+  textarea,
+  select,
+  .btn-primary,
+  .btn-ghost {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove scroll, grid, padding limits from container page */
+  main, .grid, div {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  #legal-document-preview {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    min-height: auto !important;
+  }
+}
+

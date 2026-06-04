@@ -45,9 +45,23 @@ export async function streamChat(messages, userContext, onChunk) {
 }
 
 export async function draftDocument(type, caseDetails) {
-  const prompt = `Draft a formal Indian legal document of type "${type}" with proper headings and sections.
-Case details: ${JSON.stringify(caseDetails)}
-Use formal legal English suitable for Indian courts.`;
+  const prompt = `You are an Indian legal drafting assistant.
+Draft a formal Indian court document of type "${type}" based on the following case details:
+${JSON.stringify(caseDetails)}
+
+Format requirements:
+1. You MUST output ONLY the document. Do NOT include any introductions, explanations, apologies, notes, commentary, or markdown code fences (do NOT wrap the response in \`\`\`markdown or \`\`\`).
+2. Begin directly with:
+# [DOCUMENT TITLE]
+3. Use proper court-document structure. The document MUST be structured in clean Markdown format:
+- Use H1 (#) for the main Document Title (e.g., # PETITION FOR MAINTENANCE).
+- Use H2 (##) for court details and top-level sections (e.g. ## IN THE COURT OF [COURT NAME], ## FACTS OF THE CASE, ## PRAYER).
+- Use H3 (###) for subsections and parties details (e.g. ### PETITIONER, ### RESPONDENT).
+- Under ### PETITIONER and ### RESPONDENT, use clear labels: "Name:" and "Address:".
+- Use bullet points (- or *) or numbered lists (1., 2.) for structured clauses, facts, and details.
+- Use standard paragraphs for prose.
+- Use horizontal rules (---) as dividers between major parts.
+- Use formal legal English suitable for Indian courts.`;
   return await generateResponse({ prompt, maxOutputTokens: 4096 });
 }
 
